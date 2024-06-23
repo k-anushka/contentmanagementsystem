@@ -25,7 +25,7 @@ from django.http import HttpResponse
 from django.utils.encoding import force_bytes, force_str
 from rest_framework import status
 import os
-# import send_mail
+from django.core.mail import send_mail
 
 User = get_user_model()
 # Create your views here.
@@ -56,21 +56,24 @@ class SignupView(generics.CreateAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes =[AllowAny]
     
+    def post(self,request):
+       email= request.data["email"]
+       print(email)
+       send_mail(
+          'Email Verifiation Mail',
+          f'Dear ${email}\n This mail is to verify your email id',
+          'cms@localhost',  
+          [email],
+        fail_silently=False,
+         )
+       return HttpResponse('User registered successfully, verification email sent successfully.')
 
-    # def send_test_email(request):
-    #     send_mail(
-    #       'Test Email Subject',
-    #       'This is a test email body.',
-    #       'webmaster@localhost',  # This should match DEFAULT_FROM_EMAIL
-    #       ['recipient@example.com'],  # Replace with the recipient's email address
-    #     fail_silently=False,
-    #      )
-    #     return HttpResponse('Test email sent successfully.')
+
 
 class FileUploadView(generics.CreateAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes =[IsOpsUser]
-    def put(self,request):
+    def post(self,request):
         file = request.data.get('file')
         if not file.name.endswith(('.pptx','.docx','.xlsx','.pdf')): 
             return Response({"error":"Invalid file type"})
@@ -138,9 +141,3 @@ class ListFileView(APIView):
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenSerializer      
-
-
-
-
-
-

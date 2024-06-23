@@ -1,7 +1,3 @@
-networks:
-  my_network:
-    driver: bridge
-
 services:
   db:
     image: mysql:8
@@ -13,23 +9,30 @@ services:
       MYSQL_PASSWORD: cms_user@123
     ports:
       - "3306:3306"
-    networks:
-      - my_network
-
-  cms_app:
+  app:
     build: .
     container_name: cms_app
     volumes:
-      - .:/app
+      - ./:/app
     ports:
       - "8000:8000"
     depends_on:
       - db
+      - mailserver
     environment:
       DB_NAME: cms_db
       DB_USER: cms
       DB_PASSWORD: cms_user@123
       DB_HOST: db
-    networks:
-      - my_network
+      EMAIL_HOST: mailserver
+      EMAIL_PORT: 1025
+  mailserver:
+    image: mailhog/mailhog
+    container_name: mailserver
+    ports:
+      - "1025:1025"
+      - "8025:8025"
 
+networks:
+  default:
+    driver: bridge

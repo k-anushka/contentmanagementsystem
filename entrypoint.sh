@@ -8,6 +8,7 @@
 
 # Apply database migrations
 echo "Applying database migrations..."
+python manage.py makemigrations
 python manage.py migrate
 
 # Create a superuser if it doesn't exist

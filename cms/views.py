@@ -25,7 +25,7 @@ from django.http import HttpResponse
 from django.utils.encoding import force_bytes, force_str
 from rest_framework import status
 import os
-import send_mail
+# import send_mail
 
 User = get_user_model()
 # Create your views here.
@@ -55,17 +55,17 @@ class SignupView(generics.CreateAPIView):
     serializer_class = UserSignupSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes =[AllowAny]
+    
 
-
-    def send_test_email(request):
-        send_mail(
-          'Test Email Subject',
-          'This is a test email body.',
-          'webmaster@localhost',  # This should match DEFAULT_FROM_EMAIL
-          ['recipient@example.com'],  # Replace with the recipient's email address
-        fail_silently=False,
-         )
-        return HttpResponse('Test email sent successfully.')
+    # def send_test_email(request):
+    #     send_mail(
+    #       'Test Email Subject',
+    #       'This is a test email body.',
+    #       'webmaster@localhost',  # This should match DEFAULT_FROM_EMAIL
+    #       ['recipient@example.com'],  # Replace with the recipient's email address
+    #     fail_silently=False,
+    #      )
+    #     return HttpResponse('Test email sent successfully.')
 
 class FileUploadView(generics.CreateAPIView):
     authentication_classes = [JWTAuthentication]

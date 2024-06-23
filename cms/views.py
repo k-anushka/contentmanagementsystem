@@ -97,7 +97,7 @@ class DownloadFileView(APIView):
             encoded_value = urlsafe_base64_encode(force_bytes(signed_value))
             # Generate a secure URL
             secure_url = f"{request.build_absolute_uri('/api/cms/download/')}?file={encoded_value}"
-            return Response({"secure_url": secure_url}, status=status.HTTP_200_OK)
+            return Response({"download-link": secure_url,"message":"success"}, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -36,7 +36,6 @@ class LoginViews(APIView):
     permission_classes =[AllowAny]
     serializer_class = UserLoginSerializer
     def post(self, request):
-        print(request.data)
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data
@@ -48,7 +47,7 @@ class LoginViews(APIView):
                       'access': str(refresh.access_token),
                  })
             except  User.DoesNotExist:
-                 return Response({"message": "Login successful"})
+                 return Response({"message": "Error in login"})
     
 
 class SignupView(generics.CreateAPIView):
@@ -57,16 +56,20 @@ class SignupView(generics.CreateAPIView):
     permission_classes =[AllowAny]
     
     def post(self,request):
-       email= request.data["email"]
-       print(email)
-       send_mail(
-          'Email Verifiation Mail',
-          f'Dear ${email}\n This mail is to verify your email id',
-          'cms@localhost',  
-          [email],
-        fail_silently=False,
-         )
-       return HttpResponse('User registered successfully, verification email sent successfully.')
+            email= request.data["email"]
+            serializer = self.serializer_class(data=request.data)
+            if serializer.is_valid():
+                user = serializer.validated_data
+                data=User(username= user['username'], password= user['password'], email= user['email'], user_type= user['user_type'])
+                data.save()
+            send_mail(
+             'Email Verifiation Mail',
+             f'Dear ${email}\n This mail is to verify your email id',
+             'cms@localhost',  
+             [email],
+             fail_silently=False,
+            )
+            return HttpResponse('User registered successfully, verification email sent successfully.')
 
 
 
@@ -91,11 +94,8 @@ class DownloadFileView(APIView):
         try:
             file_id=request.query_params.get("file_name")
             signer = TimestampSigner()
-
-            # Generate a signed value for the file_id
             signed_value = signer.sign(file_id)
             encoded_value = urlsafe_base64_encode(force_bytes(signed_value))
-            # Generate a secure URL
             secure_url = f"{request.build_absolute_uri('/api/cms/download/')}?file={encoded_value}"
             return Response({"download-link": secure_url,"message":"success"}, status=status.HTTP_200_OK)
 
@@ -115,9 +115,7 @@ class DownloadFileThroughLink(APIView):
         try:
             signer = TimestampSigner()
             decoded_value = force_str(urlsafe_base64_decode(file))
-            original_value = signer.unsign(decoded_value, max_age=3600)  # The link is valid for 1 hour
-            print(original_value)
-            # Get the file path from the UploadedFile model
+            original_value = signer.unsign(decoded_value) 
             try:
                 fs = FileSystemStorage()
                 file=fs.open(original_value)
